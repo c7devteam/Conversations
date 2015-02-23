@@ -150,21 +150,6 @@ public class MucOptions {
 			}
 		}
 
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			} else if (!(other instanceof User)) {
-				return false;
-			} else {
-				User o = (User) other;
-				return name != null && name.equals(o.name)
-						&& jid != null && jid.equals(o.jid)
-						&& affiliation == o.affiliation
-						&& role == o.role;
-			}
-		}
-
 		public Affiliation getAffiliation() {
 			return this.affiliation;
 		}

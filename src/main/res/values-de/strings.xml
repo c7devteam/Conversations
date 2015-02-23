@@ -417,5 +417,4 @@
   <string name="sending_x_file">Sende %s</string>
   <string name="offering_x_file">%s angeboten</string>
   <string name="hide_offline">verstecke offline</string>
-  <string name="disable_account">Konto abschalten</string>
 </resources>

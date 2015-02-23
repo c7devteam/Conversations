@@ -32,17 +32,18 @@ public class ManageAccountActivity extends XmppActivity implements OnAccountUpda
 
 	@Override
 	public void onAccountUpdate() {
-		refreshUi();
-	}
-
-	@Override
-	protected void refreshUiReal() {
 		synchronized (this.accountList) {
 			accountList.clear();
 			accountList.addAll(xmppConnectionService.getAccounts());
 		}
-		invalidateOptionsMenu();
-		mAccountAdapter.notifyDataSetChanged();
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				invalidateOptionsMenu();
+				mAccountAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 	@Override

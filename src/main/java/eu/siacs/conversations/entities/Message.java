@@ -147,11 +147,10 @@ public class Message extends AbstractEntity {
 				cursor.getString(cursor.getColumnIndex(SERVER_MSG_ID)));
 	}
 
-	public static Message createStatusMessage(Conversation conversation, String body) {
+	public static Message createStatusMessage(Conversation conversation) {
 		Message message = new Message();
 		message.setType(Message.TYPE_STATUS);
 		message.setConversation(conversation);
-		message.setBody(body);
 		return message;
 	}
 
@@ -377,9 +376,9 @@ public class Message extends AbstractEntity {
 	public String getMergedBody() {
 		final Message next = this.next();
 		if (this.mergeable(next)) {
-			return getBody().trim() + '\n' + next.getMergedBody();
+			return getBody() + '\n' + next.getMergedBody();
 		}
-		return getBody().trim();
+		return getBody();
 	}
 
 	public boolean hasMeCommand() {

@@ -1,6 +1,5 @@
 package eu.siacs.conversations.parser;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,8 +40,11 @@ public abstract class AbstractParser {
 	public static Date parseTimestamp(String timestamp) throws ParseException {
 		timestamp = timestamp.replace("Z", "+0000");
 		SimpleDateFormat dateFormat;
-		timestamp = timestamp.substring(0,19)+timestamp.substring(timestamp.length() -5,timestamp.length());
-		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ",Locale.US);
+		if (timestamp.contains(".")) {
+			dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+		} else {
+			dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ",Locale.US);
+		}
 		return dateFormat.parse(timestamp);
 	}
 

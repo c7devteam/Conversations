@@ -139,18 +139,26 @@ public class ContactDetailsActivity extends XmppActivity implements OnAccountUpd
 
 	@Override
 	public void onRosterUpdate() {
-		refreshUi();
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				invalidateOptionsMenu();
+				populateView();
+			}
+		});
 	}
 
 	@Override
 	public void onAccountUpdate() {
-		refreshUi();
-	}
+		runOnUiThread(new Runnable() {
 
-	@Override
-	protected void refreshUiReal() {
-		invalidateOptionsMenu();
-		populateView();
+			@Override
+			public void run() {
+				invalidateOptionsMenu();
+				populateView();
+			}
+		});
 	}
 
 	@Override

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondarybackground" >
+    android:background="@color/secondarybackground">
 
     <ListView
         android:id="@+id/messages_view"
@@ -18,8 +18,7 @@
         android:listSelector="@android:color/transparent"
         android:stackFromBottom="true"
         android:transcriptMode="normal"
-        tools:listitem="@layout/message_sent" >
-    </ListView>
+        tools:listitem="@layout/message_sent"></ListView>
 
     <RelativeLayout
         android:id="@+id/textsend"
@@ -27,28 +26,56 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:background="@color/primarybackground" >
+        android:background="@color/primarybackground">
 
-        <eu.siacs.conversations.ui.EditMessage
-            android:id="@+id/textinput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageButton
+            android:id="@+id/textMediaButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@+id/textSendButton"
-            android:background="@color/primarybackground"
-            android:ems="10"
-            android:imeOptions="flagNoExtractUi|actionSend"
-            android:inputType="textShortMessage|textMultiLine|textCapSentences"
-            android:minHeight="48dp"
-            android:minLines="1"
-            android:paddingBottom="12dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="12dp"
-            android:textColor="@color/primarytext" >
+            android:layout_centerVertical="true"
+            android:background="?android:selectableItemBackground"
+            android:src="@drawable/ic_sound" />
 
-            <requestFocus />
-        </eu.siacs.conversations.ui.EditMessage>
+        <FrameLayout
+            android:layout_toLeftOf="@+id/textSendButton"
+            android:layout_toRightOf="@+id/textMediaButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/audioRecordButton"
+                android:src="@drawable/ic_mic_inactive"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:visibility="gone"
+                android:layout_height="match_parent"
+                android:background="?android:selectableItemBackground" />
+
+            <eu.siacs.conversations.ui.EditMessage
+                android:id="@+id/textInput"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/primarybackground"
+                android:ems="10"
+                android:imeOptions="flagNoExtractUi|actionSend"
+                android:inputType="textShortMessage|textMultiLine|textCapSentences"
+                android:minHeight="48dp"
+                android:minLines="1"
+                android:paddingBottom="12dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="12dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:textColor="@color/primarytext">
+
+                <requestFocus />
+            </eu.siacs.conversations.ui.EditMessage>
+
+
+        </FrameLayout>
 
         <ImageButton
             android:id="@+id/textSendButton"
@@ -70,7 +97,7 @@
         android:layout_marginRight="8dp"
         android:background="@drawable/snackbar"
         android:minHeight="48dp"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/snackbar_message"

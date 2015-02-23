@@ -155,7 +155,7 @@ public class XmppConnection implements Runnable {
 			tagWriter = new TagWriter();
 			packetCallbacks.clear();
 			this.changeStatus(Account.State.CONNECTING);
-			final Bundle result = DNSHelper.getSRVRecord(account.getServer());
+			final Bundle result = DNSHelper.getSRVRecord(account.getHost());
 			final ArrayList<Parcelable> values = result.getParcelableArrayList("values");
 			if ("timeout".equals(result.getString("error"))) {
 				throw new IOException("timeout in dns");
@@ -202,7 +202,7 @@ public class XmppConnection implements Runnable {
 				}
 			} else if (result.containsKey("error")
 					&& "nosrv".equals(result.getString("error", null))) {
-				socket = new Socket(account.getServer().getDomainpart(), 5222);
+				socket = new Socket(account.getHost(), account.getPort());
 			} else {
 				throw new IOException("timeout in dns");
 			}
@@ -229,7 +229,6 @@ public class XmppConnection implements Runnable {
 		} catch (final IOException | XmlPullParserException | NoSuchAlgorithmException e) {
 			Log.d(Config.LOGTAG, account.getJid().toBareJid().toString() + ": " + e.getMessage());
 			this.changeStatus(Account.State.OFFLINE);
-			this.attempt--; //don't count attempt when reconnecting instantly anyway
 		} finally {
 			if (wakeLock.isHeld()) {
 				try {
@@ -515,14 +514,13 @@ public class XmppConnection implements Runnable {
 
 			sslSocket.setEnabledProtocols(supportProtocols);
 
-			final String[] cipherSuites = CryptoHelper.getOrderedCipherSuites(
+			final String[] cipherSuites = CryptoHelper.getSupportedCipherSuites(
 					sslSocket.getSupportedCipherSuites());
-			//Log.d(Config.LOGTAG, "Using ciphers: " + Arrays.toString(cipherSuites));
 			if (cipherSuites.length > 0) {
 				sslSocket.setEnabledCipherSuites(cipherSuites);
 			}
 
-			if (!verifier.verify(account.getServer().getDomainpart(),sslSocket.getSession())) {
+			if (!verifier.verify(account.getHost(),sslSocket.getSession())) {
 				Log.d(Config.LOGTAG,account.getJid().toBareJid()+": TLS certificate verification failed");
 				disconnect(true);
 				changeStatus(Account.State.SECURITY_ERROR);
@@ -659,12 +657,6 @@ public class XmppConnection implements Runnable {
 	}
 
 	private void sendBindRequest() {
-		while(!mXmppConnectionService.areMessagesInitialized()) {
-			try {
-				Thread.sleep(500);
-			} catch (final InterruptedException ignored) {
-			}
-		}
 		final IqPacket iq = new IqPacket(IqPacket.TYPE.SET);
 		iq.addChild("bind", "urn:ietf:params:xml:ns:xmpp-bind")
 			.addChild("resource").setContent(account.getResource());
@@ -1032,11 +1024,6 @@ public class XmppConnection implements Runnable {
 
 	public void sendInactive() {
 		this.sendPacket(new InactivePacket());
-	}
-
-	public void resetAttemptCount() {
-		this.attempt = 0;
-		this.lastConnect = 0;
 	}
 
 	public class Features {

@@ -41,7 +41,6 @@ import eu.siacs.conversations.ui.ConversationActivity;
 import eu.siacs.conversations.ui.ManageAccountActivity;
 import eu.siacs.conversations.ui.TimePreference;
 import eu.siacs.conversations.utils.UIHelper;
-import eu.siacs.conversations.xmpp.XmppConnection;
 
 public class NotificationService {
 
@@ -271,8 +270,7 @@ public class NotificationService {
 			}
 			if ((message = getFirstDownloadableMessage(messages)) != null) {
 				mBuilder.addAction(
-						Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ?
-								R.drawable.ic_file_download_white_24dp : R.drawable.ic_action_download,
+						R.drawable.ic_action_download,
 						mXmppConnectionService.getResources().getString(R.string.download_x_file,
 							UIHelper.getFileDescriptionString(mXmppConnectionService, message)),
 						createDownloadIntent(message)
@@ -396,20 +394,7 @@ public class NotificationService {
 		final Intent intent = new Intent(mXmppConnectionService,
 				XmppConnectionService.class);
 		intent.setAction(XmppConnectionService.ACTION_DISABLE_FOREGROUND);
-		return PendingIntent.getService(mXmppConnectionService, 34, intent, 0);
-	}
-
-	private PendingIntent createTryAgainIntent() {
-		final Intent intent = new Intent(mXmppConnectionService, XmppConnectionService.class);
-		intent.setAction(XmppConnectionService.ACTION_TRY_AGAIN);
-		return PendingIntent.getService(mXmppConnectionService, 45, intent, 0);
-	}
-
-	private PendingIntent createDisableAccountIntent(final Account account) {
-		final Intent intent = new Intent(mXmppConnectionService,XmppConnectionService.class);
-		intent.setAction(XmppConnectionService.ACTION_DISABLE_ACCOUNT);
-		intent.putExtra("account",account.getJid().toBareJid().toString());
-		return PendingIntent.getService(mXmppConnectionService,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+		return PendingIntent.getService(mXmppConnectionService, 0, intent, 0);
 	}
 
 	private boolean wasHighlightedOrPrivate(final Message message) {
@@ -461,24 +446,18 @@ public class NotificationService {
 
 	public Notification createForegroundNotification() {
 		final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mXmppConnectionService);
-
+		mBuilder.setSmallIcon(R.drawable.ic_stat_communication_import_export);
 		mBuilder.setContentTitle(mXmppConnectionService.getString(R.string.conversations_foreground_service));
 		mBuilder.setContentText(mXmppConnectionService.getString(R.string.touch_to_open_conversations));
+		mBuilder.addAction(R.drawable.ic_action_cancel,
+				mXmppConnectionService.getString(R.string.disable_foreground_service),
+				createDisableForeground());
 		mBuilder.setContentIntent(createOpenConversationsIntent());
 		mBuilder.setWhen(0);
 		mBuilder.setPriority(NotificationCompat.PRIORITY_MIN);
-		final int cancelIcon;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			mBuilder.setCategory(Notification.CATEGORY_SERVICE);
-			mBuilder.setSmallIcon(R.drawable.ic_import_export_white_48dp);
-			cancelIcon = R.drawable.ic_cancel_white_24dp;
-		} else {
-			mBuilder.setSmallIcon(R.drawable.ic_stat_communication_import_export);
-			cancelIcon = R.drawable.ic_action_cancel;
 		}
-		mBuilder.addAction(cancelIcon,
-				mXmppConnectionService.getString(R.string.disable_foreground_service),
-				createDisableForeground());
 		setNotificationColor(mBuilder);
 		return mBuilder.build();
 	}
@@ -506,21 +485,9 @@ public class NotificationService {
 			mBuilder.setContentTitle(mXmppConnectionService.getString(R.string.problem_connecting_to_accounts));
 			mBuilder.setContentText(mXmppConnectionService.getString(R.string.touch_to_fix));
 		}
-		mBuilder.addAction(R.drawable.ic_autorenew_white_24dp,
-				mXmppConnectionService.getString(R.string.try_again),
-				createTryAgainIntent());
-		if (errors.size() == 1) {
-			mBuilder.addAction(R.drawable.ic_block_white_24dp,
-					mXmppConnectionService.getString(R.string.disable_account),
-					createDisableAccountIntent(errors.get(0)));
-		}
 		mBuilder.setOngoing(true);
 		//mBuilder.setLights(0xffffffff, 2000, 4000);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			mBuilder.setSmallIcon(R.drawable.ic_warning_white_36dp);
-		} else {
-			mBuilder.setSmallIcon(R.drawable.ic_stat_alert_warning);
-		}
+		mBuilder.setSmallIcon(R.drawable.ic_stat_alert_warning);
 		final TaskStackBuilder stackBuilder = TaskStackBuilder.create(mXmppConnectionService);
 		stackBuilder.addParentStack(ConversationActivity.class);
 

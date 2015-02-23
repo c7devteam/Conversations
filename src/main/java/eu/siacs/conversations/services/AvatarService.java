@@ -38,10 +38,10 @@ public class AvatarService {
 		this.mXmppConnectionService = service;
 	}
 
-	private Bitmap get(final Contact contact, final int size, boolean cachedOnly) {
+	public Bitmap get(final Contact contact, final int size) {
 		final String KEY = key(contact, size);
 		Bitmap avatar = this.mXmppConnectionService.getBitmapCache().get(KEY);
-		if (avatar != null || cachedOnly) {
+		if (avatar != null) {
 			return avatar;
 		}
 		if (contact.getProfilePhoto() != null) {
@@ -51,7 +51,7 @@ public class AvatarService {
 			avatar = mXmppConnectionService.getFileBackend().getAvatar(contact.getAvatar(), size);
 		}
 		if (avatar == null) {
-            avatar = get(contact.getDisplayName(), size, cachedOnly);
+            avatar = get(contact.getDisplayName(), size);
 		}
 		this.mXmppConnectionService.getBitmapCache().put(KEY, avatar);
 		return avatar;
@@ -77,33 +77,25 @@ public class AvatarService {
 	}
 
 	public Bitmap get(ListItem item, int size) {
-		return get(item,size,false);
-	}
-
-	public Bitmap get(ListItem item, int size, boolean cachedOnly) {
 		if (item instanceof Contact) {
-			return get((Contact) item, size,cachedOnly);
+			return get((Contact) item, size);
 		} else if (item instanceof Bookmark) {
 			Bookmark bookmark = (Bookmark) item;
 			if (bookmark.getConversation() != null) {
-				return get(bookmark.getConversation(), size, cachedOnly);
+				return get(bookmark.getConversation(), size);
 			} else {
-				return get(bookmark.getDisplayName(), size, cachedOnly);
+				return get(bookmark.getDisplayName(), size);
 			}
 		} else {
-			return get(item.getDisplayName(), size, cachedOnly);
+			return get(item.getDisplayName(), size);
 		}
 	}
 
 	public Bitmap get(Conversation conversation, int size) {
-		return get(conversation,size,false);
-	}
-
-	public Bitmap get(Conversation conversation, int size, boolean cachedOnly) {
 		if (conversation.getMode() == Conversation.MODE_SINGLE) {
-			return get(conversation.getContact(), size, cachedOnly);
+			return get(conversation.getContact(), size);
 		} else {
-			return get(conversation.getMucOptions(), size, cachedOnly);
+			return get(conversation.getMucOptions(), size);
 		}
 	}
 
@@ -115,10 +107,10 @@ public class AvatarService {
 		}
 	}
 
-	private Bitmap get(MucOptions mucOptions, int size,  boolean cachedOnly) {
+	public Bitmap get(MucOptions mucOptions, int size) {
 		final String KEY = key(mucOptions, size);
 		Bitmap bitmap = this.mXmppConnectionService.getBitmapCache().get(KEY);
-		if (bitmap != null || cachedOnly) {
+		if (bitmap != null) {
 			return bitmap;
 		}
 		final List<MucOptions.User> users = new ArrayList<>(mucOptions.getUsers());
@@ -187,7 +179,7 @@ public class AvatarService {
 		avatar = mXmppConnectionService.getFileBackend().getAvatar(
 				account.getAvatar(), size);
 		if (avatar == null) {
-			avatar = get(account.getJid().toBareJid().toString(), size,false);
+			avatar = get(account.getJid().toBareJid().toString(), size);
 		}
 		mXmppConnectionService.getBitmapCache().put(KEY, avatar);
 		return avatar;
@@ -212,14 +204,10 @@ public class AvatarService {
 				+ String.valueOf(size);
 	}
 
-	public Bitmap get(String name, int size) {
-		return get(name,size,false);
-	}
-
-	public Bitmap get(final String name, final int size, boolean cachedOnly) {
+	public Bitmap get(final String name, final int size) {
 		final String KEY = key(name, size);
 		Bitmap bitmap = mXmppConnectionService.getBitmapCache().get(KEY);
-		if (bitmap != null || cachedOnly) {
+		if (bitmap != null) {
 			return bitmap;
 		}
 		bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);

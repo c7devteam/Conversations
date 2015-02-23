@@ -1,6 +1,7 @@
 package eu.siacs.conversations.parser;
 
-import java.util.ArrayList;
+import android.text.TextUtils;
+import android.util.Log;
 
 import eu.siacs.conversations.crypto.PgpEngine;
 import eu.siacs.conversations.entities.Account;
@@ -11,108 +12,142 @@ import eu.siacs.conversations.entities.Presences;
 import eu.siacs.conversations.generator.PresenceGenerator;
 import eu.siacs.conversations.services.XmppConnectionService;
 import eu.siacs.conversations.xml.Element;
+import eu.siacs.conversations.xmpp.OnIqPacketReceived;
 import eu.siacs.conversations.xmpp.OnPresencePacketReceived;
 import eu.siacs.conversations.xmpp.jid.Jid;
+import eu.siacs.conversations.xmpp.stanzas.IqPacket;
 import eu.siacs.conversations.xmpp.stanzas.PresencePacket;
 
 public class PresenceParser extends AbstractParser implements
-		OnPresencePacketReceived {
+        OnPresencePacketReceived {
+    static final String TAG = PresenceParser.class.getSimpleName();
 
-	public PresenceParser(XmppConnectionService service) {
-		super(service);
-	}
+    public PresenceParser(XmppConnectionService service) {
+        super(service);
+    }
 
-	public void parseConferencePresence(PresencePacket packet, Account account) {
-		PgpEngine mPgpEngine = mXmppConnectionService.getPgpEngine();
-		final Conversation conversation = packet.getFrom() == null ? null : mXmppConnectionService.find(account, packet.getFrom().toBareJid());
-		if (conversation != null) {
-			final MucOptions mucOptions = conversation.getMucOptions();
-			boolean before = mucOptions.online();
-			int count = mucOptions.getUsers().size();
-			final ArrayList<MucOptions.User> tileUserBefore = new ArrayList<>(mucOptions.getUsers().subList(0,Math.min(mucOptions.getUsers().size(),5)));
-			mucOptions.processPacket(packet, mPgpEngine);
-			final ArrayList<MucOptions.User> tileUserAfter = new ArrayList<>(mucOptions.getUsers().subList(0,Math.min(mucOptions.getUsers().size(),5)));
-			if (!tileUserAfter.equals(tileUserBefore)) {
-				mXmppConnectionService.getAvatarService().clear(conversation);
-			}
-			if (before != mucOptions.online() || (mucOptions.online() && count != mucOptions.getUsers().size())) {
-				mXmppConnectionService.updateConversationUi();
-			} else if (mucOptions.online()) {
-				mXmppConnectionService.updateMucRosterUi();
-			}
-		}
-	}
+    public void parseConferencePresence(PresencePacket packet, Account account) {
+        PgpEngine mPgpEngine = mXmppConnectionService.getPgpEngine();
+        final Conversation conversation = packet.getFrom() == null ? null : mXmppConnectionService.find(account, packet.getFrom().toBareJid());
+        if (conversation != null) {
+            final MucOptions mucOptions = conversation.getMucOptions();
+            boolean before = mucOptions.online();
+            int count = mucOptions.getUsers().size();
+            mucOptions.processPacket(packet, mPgpEngine);
+            mXmppConnectionService.getAvatarService().clear(conversation);
+            if (before != mucOptions.online() || (mucOptions.online() && count != mucOptions.getUsers().size())) {
+                mXmppConnectionService.updateConversationUi();
+            } else if (mucOptions.online()) {
+                mXmppConnectionService.updateMucRosterUi();
+            }
+        }
+    }
 
-	public void parseContactPresence(PresencePacket packet, Account account) {
-		PresenceGenerator mPresenceGenerator = mXmppConnectionService
-				.getPresenceGenerator();
-		if (packet.getFrom() == null) {
-			return;
-		}
-		final Jid from = packet.getFrom();
-		String type = packet.getAttribute("type");
-		Contact contact = account.getRoster().getContact(packet.getFrom());
-		if (type == null) {
-			String presence;
-			if (!from.isBareJid()) {
-				presence = from.getResourcepart();
-			} else {
-				presence = "";
-			}
-			int sizeBefore = contact.getPresences().size();
-			contact.updatePresence(presence,
-					Presences.parseShow(packet.findChild("show")));
-			PgpEngine pgp = mXmppConnectionService.getPgpEngine();
-			if (pgp != null) {
-				Element x = packet.findChild("x", "jabber:x:signed");
-				if (x != null) {
-					Element status = packet.findChild("status");
-					String msg;
-					if (status != null) {
-						msg = status.getContent();
-					} else {
-						msg = "";
-					}
-					contact.setPgpKeyId(pgp.fetchKeyId(account, msg,
-							x.getContent()));
-				}
-			}
-			boolean online = sizeBefore < contact.getPresences().size();
-			updateLastseen(packet, account, false);
-			mXmppConnectionService.onContactStatusChanged.onContactStatusChanged(contact, online);
-		} else if (type.equals("unavailable")) {
-			if (from.isBareJid()) {
-				contact.clearPresences();
-			} else {
-				contact.removePresence(from.getResourcepart());
-			}
-			mXmppConnectionService.onContactStatusChanged
-					.onContactStatusChanged(contact, false);
-		} else if (type.equals("subscribe")) {
-			if (contact.getOption(Contact.Options.PREEMPTIVE_GRANT)) {
-				mXmppConnectionService.sendPresencePacket(account,
-						mPresenceGenerator.sendPresenceUpdatesTo(contact));
-			} else {
-				contact.setOption(Contact.Options.PENDING_SUBSCRIPTION_REQUEST);
-			}
-		}
-		Element nick = packet.findChild("nick",
-				"http://jabber.org/protocol/nick");
-		if (nick != null) {
-			contact.setPresenceName(nick.getContent());
-		}
-		mXmppConnectionService.updateRosterUi();
-	}
+    public void parseContactPresence(PresencePacket packet, Account account) {
+        Log.i(TAG, "account=" + account.getJid() + " packet=" + packet);
+        PresenceGenerator mPresenceGenerator = mXmppConnectionService
+                .getPresenceGenerator();
+        if (packet.getFrom() == null) {
+            return;
+        }
+        final Jid from = packet.getFrom();
+        String type = packet.getAttribute("type");
+        Contact contact = account.getRoster().getContact(packet.getFrom());
+        Log.i(TAG, "type=" + type);
+        if (type == null) {
+            String presence;
+            if (!from.isBareJid()) {
+                presence = from.getResourcepart();
+            } else {
+                presence = "";
+            }
+            Log.i(TAG, "presence=" + presence);
+            int sizeBefore = contact.getPresences().size();
+            contact.updatePresence(presence,
+                    Presences.parseShow(packet.findChild("show")));
+            PgpEngine pgp = mXmppConnectionService.getPgpEngine();
+            if (pgp != null) {
+                Element x = packet.findChild("x", "jabber:x:signed");
+                if (x != null) {
+                    Element status = packet.findChild("status");
+                    String msg;
+                    if (status != null) {
+                        msg = status.getContent();
+                    } else {
+                        msg = "";
+                    }
+                    contact.setPgpKeyId(pgp.fetchKeyId(account, msg,
+                            x.getContent()));
+                }
+            }
+            boolean online = sizeBefore < contact.getPresences().size();
+            updateLastseen(packet, account, false);
+            mXmppConnectionService.onContactStatusChanged.onContactStatusChanged(contact, online);
+        } else if (type.equals("unavailable")) {
+            if (from.isBareJid()) {
+                contact.clearPresences();
+            } else {
+                contact.removePresence(from.getResourcepart());
+            }
+            mXmppConnectionService.onContactStatusChanged
+                    .onContactStatusChanged(contact, false);
+        } else if (type.equals("subscribe")) {
+            if (contact.getOption(Contact.Options.PREEMPTIVE_GRANT)) {
+                mXmppConnectionService.sendPresencePacket(account,
+                        mPresenceGenerator.sendPresenceUpdatesTo(contact));
+            } else {
+                contact.setOption(Contact.Options.PENDING_SUBSCRIPTION_REQUEST);
+            }
+        }
+        Element nick = packet.findChild("nick",
+                "http://jabber.org/protocol/nick");
+        if (nick != null) {
+            contact.setPresenceName(nick.getContent());
+        }
+        mXmppConnectionService.updateRosterUi();
+    }
 
-	@Override
-	public void onPresencePacketReceived(Account account, PresencePacket packet) {
-		if (packet.hasChild("x", "http://jabber.org/protocol/muc#user")) {
-			this.parseConferencePresence(packet, account);
-		} else if (packet.hasChild("x", "http://jabber.org/protocol/muc")) {
-			this.parseConferencePresence(packet, account);
-		} else {
-			this.parseContactPresence(packet, account);
-		}
-	}
+    public void parseVCardPresence(PresencePacket packet, Account account) {
+        Log.i(TAG, "parseVCardPresence " + packet);
+        Element x = packet.findChild("x", "vcard-temp:x:update");
+        Element photo = x.findChild("photo", "vcard-temp:x:update");
+        if (photo != null) {
+            String sha1sum = photo.getContent();
+            Jid fromJid = packet.getFrom();
+            Log.d(TAG, "parseVCardPresence sha1sum=" + sha1sum + " fromJid=" + fromJid);
+            if (!TextUtils.isEmpty(sha1sum) && fromJid != null) {
+                mXmppConnectionService.fetchAvatar(account, fromJid, sha1sum);
+            }
+        }
+//        IqPacket discoRequest = mXmppConnectionService.getIqGenerator().discoRequest(account);
+//        mXmppConnectionService.sendIqPacket(account, mXmppConnectionService.getIqGenerator().discoRequest(account), new OnIqPacketReceived() {
+//            @Override
+//            public void onIqPacketReceived(Account account, IqPacket packet) {
+//                Element query = packet.findChild("query", "http://jabber.org/protocol/disco#info");
+//                if (query != null) {
+//                    for (Element child : query.getChildren()) {
+//                        if (child.getName().equals("feature")) {
+//                            Log.i(TAG, "feature=" + child);
+//                        }
+//                    }
+//                }
+//
+//            }
+//        });
+    }
+
+    @Override
+    public void onPresencePacketReceived(Account account, PresencePacket packet) {
+        Log.d(TAG, "packet=" + packet);
+        if (packet.hasChild("x", "http://jabber.org/protocol/muc#user")) {
+            this.parseConferencePresence(packet, account);
+        } else if (packet.hasChild("x", "http://jabber.org/protocol/muc")) {
+            this.parseConferencePresence(packet, account);
+        } else if (packet.hasChild("x", "vcard-temp:x:update")) {
+            this.parseVCardPresence(packet, account);
+        } else {
+            this.parseContactPresence(packet, account);
+        }
+    }
 
 }

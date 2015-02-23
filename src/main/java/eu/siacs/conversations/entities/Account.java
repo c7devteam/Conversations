@@ -3,6 +3,8 @@ package eu.siacs.conversations.entities;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.Log;
 
 import net.java.otr4j.crypto.OtrCryptoEngineImpl;
 import net.java.otr4j.crypto.OtrCryptoException;
@@ -26,386 +28,400 @@ import eu.siacs.conversations.xmpp.jid.InvalidJidException;
 import eu.siacs.conversations.xmpp.jid.Jid;
 
 public class Account extends AbstractEntity {
+    public static final String TAG=Account.class.getSimpleName();
 
-	public static final String TABLENAME = "accounts";
+    public static final String TABLENAME = "accounts";
 
-	public static final String USERNAME = "username";
-	public static final String SERVER = "server";
-	public static final String PASSWORD = "password";
-	public static final String OPTIONS = "options";
-	public static final String ROSTERVERSION = "rosterversion";
-	public static final String KEYS = "keys";
-	public static final String AVATAR = "avatar";
+    public static final String USERNAME = "username";
+    public static final String SERVER = "server";
+    public static final String PASSWORD = "password";
+    public static final String OPTIONS = "options";
+    public static final String ROSTERVERSION = "rosterversion";
+    public static final String KEYS = "keys";
+    public static final String AVATAR = "avatar";
 
-	public static final String PINNED_MECHANISM_KEY = "pinned_mechanism";
+    public static final String PINNED_MECHANISM_KEY = "pinned_mechanism";
 
-	public static final int OPTION_USETLS = 0;
-	public static final int OPTION_DISABLED = 1;
-	public static final int OPTION_REGISTER = 2;
-	public static final int OPTION_USECOMPRESSION = 3;
+    public static final int OPTION_USETLS = 0;
+    public static final int OPTION_DISABLED = 1;
+    public static final int OPTION_REGISTER = 2;
+    public static final int OPTION_USECOMPRESSION = 3;
 
-	public static enum State {
-		DISABLED,
-		OFFLINE,
-		CONNECTING,
-		ONLINE,
-		NO_INTERNET,
-		UNAUTHORIZED(true),
-		SERVER_NOT_FOUND(true),
-		REGISTRATION_FAILED(true),
-		REGISTRATION_CONFLICT(true),
-		REGISTRATION_SUCCESSFUL,
-		REGISTRATION_NOT_SUPPORTED(true),
-		SECURITY_ERROR(true),
-		INCOMPATIBLE_SERVER(true);
 
-		private final boolean isError;
+    public static enum State {
+        DISABLED,
+        OFFLINE,
+        CONNECTING,
+        ONLINE,
+        NO_INTERNET,
+        UNAUTHORIZED(true),
+        SERVER_NOT_FOUND(true),
+        REGISTRATION_FAILED(true),
+        REGISTRATION_CONFLICT(true),
+        REGISTRATION_SUCCESSFUL,
+        REGISTRATION_NOT_SUPPORTED(true),
+        SECURITY_ERROR(true),
+        INCOMPATIBLE_SERVER(true);
 
-		public boolean isError() {
-			return this.isError;
-		}
+        private final boolean isError;
 
-		private State(final boolean isError) {
-			this.isError = isError;
-		}
+        public boolean isError() {
+            return this.isError;
+        }
 
-		private State() {
-			this(false);
-		}
+        private State(final boolean isError) {
+            this.isError = isError;
+        }
 
-		public int getReadableId() {
-			switch (this) {
-				case DISABLED:
-					return R.string.account_status_disabled;
-				case ONLINE:
-					return R.string.account_status_online;
-				case CONNECTING:
-					return R.string.account_status_connecting;
-				case OFFLINE:
-					return R.string.account_status_offline;
-				case UNAUTHORIZED:
-					return R.string.account_status_unauthorized;
-				case SERVER_NOT_FOUND:
-					return R.string.account_status_not_found;
-				case NO_INTERNET:
-					return R.string.account_status_no_internet;
-				case REGISTRATION_FAILED:
-					return R.string.account_status_regis_fail;
-				case REGISTRATION_CONFLICT:
-					return R.string.account_status_regis_conflict;
-				case REGISTRATION_SUCCESSFUL:
-					return R.string.account_status_regis_success;
-				case REGISTRATION_NOT_SUPPORTED:
-					return R.string.account_status_regis_not_sup;
-				case SECURITY_ERROR:
-					return R.string.account_status_security_error;
-				case INCOMPATIBLE_SERVER:
-					return R.string.account_status_incompatible_server;
-				default:
-					return R.string.account_status_unknown;
-			}
-		}
-	}
+        private State() {
+            this(false);
+        }
 
-	public List<Conversation> pendingConferenceJoins = new CopyOnWriteArrayList<>();
-	public List<Conversation> pendingConferenceLeaves = new CopyOnWriteArrayList<>();
-	protected Jid jid;
-	protected String password;
-	protected int options = 0;
-	protected String rosterVersion;
-	protected State status = State.OFFLINE;
-	protected JSONObject keys = new JSONObject();
-	protected String avatar;
-	protected boolean online = false;
-	private OtrEngine otrEngine = null;
-	private XmppConnection xmppConnection = null;
-	private long mEndGracePeriod = 0L;
-	private String otrFingerprint;
-	private final Roster roster = new Roster(this);
-	private List<Bookmark> bookmarks = new CopyOnWriteArrayList<>();
-	private final Collection<Jid> blocklist = new CopyOnWriteArraySet<>();
+        public int getReadableId() {
+            switch (this) {
+                case DISABLED:
+                    return R.string.account_status_disabled;
+                case ONLINE:
+                    return R.string.account_status_online;
+                case CONNECTING:
+                    return R.string.account_status_connecting;
+                case OFFLINE:
+                    return R.string.account_status_offline;
+                case UNAUTHORIZED:
+                    return R.string.account_status_unauthorized;
+                case SERVER_NOT_FOUND:
+                    return R.string.account_status_not_found;
+                case NO_INTERNET:
+                    return R.string.account_status_no_internet;
+                case REGISTRATION_FAILED:
+                    return R.string.account_status_regis_fail;
+                case REGISTRATION_CONFLICT:
+                    return R.string.account_status_regis_conflict;
+                case REGISTRATION_SUCCESSFUL:
+                    return R.string.account_status_regis_success;
+                case REGISTRATION_NOT_SUPPORTED:
+                    return R.string.account_status_regis_not_sup;
+                case SECURITY_ERROR:
+                    return R.string.account_status_security_error;
+                case INCOMPATIBLE_SERVER:
+                    return R.string.account_status_incompatible_server;
+                default:
+                    return R.string.account_status_unknown;
+            }
+        }
+    }
 
-	public Account() {
-		this.uuid = "0";
-	}
+    public List<Conversation> pendingConferenceJoins = new CopyOnWriteArrayList<>();
+    public List<Conversation> pendingConferenceLeaves = new CopyOnWriteArrayList<>();
+    protected Jid jid;
+    protected String host = Config.HOST_DEFAULT;
+    protected int port;
+    protected String password;
+    protected int options = 0;
+    protected String rosterVersion;
+    protected State status = State.OFFLINE;
+    protected JSONObject keys = new JSONObject();
+    protected String avatar;
+    protected boolean online = false;
+    private OtrEngine otrEngine = null;
+    private XmppConnection xmppConnection = null;
+    private long mEndGracePeriod = 0L;
+    private String otrFingerprint;
+    private final Roster roster = new Roster(this);
+    private List<Bookmark> bookmarks = new CopyOnWriteArrayList<>();
+    private final Collection<Jid> blocklist = new CopyOnWriteArraySet<>();
 
-	public Account(final Jid jid, final String password) {
-		this(java.util.UUID.randomUUID().toString(), jid,
-				password, 0, null, "", null);
-	}
+    public Account() {
+        this.uuid = "0";
+    }
 
-	public Account(final String uuid, final Jid jid,
-			final String password, final int options, final String rosterVersion, final String keys,
-			final String avatar) {
-		this.uuid = uuid;
-		this.jid = jid;
-		if (jid.isBareJid()) {
-			this.setResource("mobile");
-		}
-		this.password = password;
-		this.options = options;
-		this.rosterVersion = rosterVersion;
-		try {
-			this.keys = new JSONObject(keys);
-		} catch (final JSONException ignored) {
+    public Account(final Jid jid, final String password) {
+        this(java.util.UUID.randomUUID().toString(), jid,
+                password, 0, null, "", null);
+    }
 
-		}
-		this.avatar = avatar;
-	}
+    public Account(final String uuid, final Jid jid,
+                   final String password, final int options, final String rosterVersion, final String keys,
+                   final String avatar) {
+        this.uuid = uuid;
+        this.jid = jid;
+        if (jid.isBareJid()) {
+            this.setResource("mobile");
+        }
+        this.password = password;
+        this.options = options;
+        this.rosterVersion = rosterVersion;
+        try {
+            this.keys = new JSONObject(keys);
+        } catch (final JSONException ignored) {
 
-	public static Account fromCursor(final Cursor cursor) {
-		Jid jid = null;
-		try {
-			jid = Jid.fromParts(cursor.getString(cursor.getColumnIndex(USERNAME)),
-					cursor.getString(cursor.getColumnIndex(SERVER)), "mobile");
-		} catch (final InvalidJidException ignored) {
-		}
-		return new Account(cursor.getString(cursor.getColumnIndex(UUID)),
-				jid,
-				cursor.getString(cursor.getColumnIndex(PASSWORD)),
-				cursor.getInt(cursor.getColumnIndex(OPTIONS)),
-				cursor.getString(cursor.getColumnIndex(ROSTERVERSION)),
-				cursor.getString(cursor.getColumnIndex(KEYS)),
-				cursor.getString(cursor.getColumnIndex(AVATAR)));
-	}
+        }
+        this.avatar = avatar;
+    }
 
-	public boolean isOptionSet(final int option) {
-		return ((options & (1 << option)) != 0);
-	}
+    public static Account fromCursor(final Cursor cursor) {
+        Jid jid = null;
+        try {
+            jid = Jid.fromParts(cursor.getString(cursor.getColumnIndex(USERNAME)),
+                    cursor.getString(cursor.getColumnIndex(SERVER)), "mobile");
+        } catch (final InvalidJidException ignored) {
+        }
+        return new Account(cursor.getString(cursor.getColumnIndex(UUID)),
+                jid,
+                cursor.getString(cursor.getColumnIndex(PASSWORD)),
+                cursor.getInt(cursor.getColumnIndex(OPTIONS)),
+                cursor.getString(cursor.getColumnIndex(ROSTERVERSION)),
+                cursor.getString(cursor.getColumnIndex(KEYS)),
+                cursor.getString(cursor.getColumnIndex(AVATAR)));
+    }
 
-	public void setOption(final int option, final boolean value) {
-		if (value) {
-			this.options |= 1 << option;
-		} else {
-			this.options &= ~(1 << option);
-		}
-	}
+    public boolean isOptionSet(final int option) {
+        return ((options & (1 << option)) != 0);
+    }
 
-	public String getUsername() {
-		return jid.getLocalpart();
-	}
+    public void setOption(final int option, final boolean value) {
+        if (value) {
+            this.options |= 1 << option;
+        } else {
+            this.options &= ~(1 << option);
+        }
+    }
 
-	public void setUsername(final String username) throws InvalidJidException {
-		jid = Jid.fromParts(username, jid.getDomainpart(), jid.getResourcepart());
-	}
+    public String getUsername() {
+        return jid.getLocalpart();
+    }
 
-	public Jid getServer() {
-		return jid.toDomainJid();
-	}
+    public void setUsername(final String username) throws InvalidJidException {
+        jid = Jid.fromParts(username, jid.getDomainpart(), jid.getResourcepart());
+    }
 
-	public void setServer(final String server) throws InvalidJidException {
-		jid = Jid.fromParts(jid.getLocalpart(), server, jid.getResourcepart());
-	}
+    public Jid getServer() {
+        return jid.toDomainJid();
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getHost() {
+        return !TextUtils.isEmpty(host) ? host : getServer().toString();
+    }
 
-	public void setPassword(final String password) {
-		this.password = password;
-	}
+    public int getPort() {
+        return port > 0 && port <= 65535 ? port : 5222;
+    }
 
-	public State getStatus() {
-		if (isOptionSet(OPTION_DISABLED)) {
-			return State.DISABLED;
-		} else {
-			return this.status;
-		}
-	}
+    public void setServer(final String server) throws InvalidJidException {
+        jid = Jid.fromParts(jid.getLocalpart(), server, jid.getResourcepart());
+    }
 
-	public void setStatus(final State status) {
-		this.status = status;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public boolean errorStatus() {
-		return getStatus().isError();
-	}
+    public void setPassword(final String password) {
+        this.password = password;
+    }
 
-	public boolean hasErrorStatus() {
-		return getXmppConnection() != null && getStatus().isError() && getXmppConnection().getAttempt() >= 2;
-	}
+    public State getStatus() {
+        if (isOptionSet(OPTION_DISABLED)) {
+            return State.DISABLED;
+        } else {
+            return this.status;
+        }
+    }
 
-	public String getResource() {
-		return jid.getResourcepart();
-	}
+    public void setStatus(final State status) {
+        this.status = status;
+    }
 
-	public void setResource(final String resource) {
-		try {
-			jid = Jid.fromParts(jid.getLocalpart(), jid.getDomainpart(), resource);
-		} catch (final InvalidJidException ignored) {
-		}
-	}
+    public boolean errorStatus() {
+        return getStatus().isError();
+    }
 
-	public Jid getJid() {
-		return jid;
-	}
+    public boolean hasErrorStatus() {
+        return getXmppConnection() != null && getStatus().isError() && getXmppConnection().getAttempt() >= 2;
+    }
 
-	public JSONObject getKeys() {
-		return keys;
-	}
+    public String getResource() {
+        return jid.getResourcepart();
+    }
 
-	public boolean setKey(final String keyName, final String keyValue) {
-		try {
-			this.keys.put(keyName, keyValue);
-			return true;
-		} catch (final JSONException e) {
-			return false;
-		}
-	}
+    public void setResource(final String resource) {
+        try {
+            jid = Jid.fromParts(jid.getLocalpart(), jid.getDomainpart(), resource);
+        } catch (final InvalidJidException ignored) {
+        }
+    }
 
-	@Override
-	public ContentValues getContentValues() {
-		final ContentValues values = new ContentValues();
-		values.put(UUID, uuid);
-		values.put(USERNAME, jid.getLocalpart());
-		values.put(SERVER, jid.getDomainpart());
-		values.put(PASSWORD, password);
-		values.put(OPTIONS, options);
-		values.put(KEYS, this.keys.toString());
-		values.put(ROSTERVERSION, rosterVersion);
-		values.put(AVATAR, avatar);
-		return values;
-	}
+    public Jid getJid() {
+        return jid;
+    }
 
-	public void initOtrEngine(final XmppConnectionService context) {
-		this.otrEngine = new OtrEngine(context, this);
-	}
+    public JSONObject getKeys() {
+        return keys;
+    }
 
-	public OtrEngine getOtrEngine() {
-		return this.otrEngine;
-	}
+    public boolean setKey(final String keyName, final String keyValue) {
+        try {
+            this.keys.put(keyName, keyValue);
+            return true;
+        } catch (final JSONException e) {
+            return false;
+        }
+    }
 
-	public XmppConnection getXmppConnection() {
-		return this.xmppConnection;
-	}
+    @Override
+    public ContentValues getContentValues() {
+        final ContentValues values = new ContentValues();
+        values.put(UUID, uuid);
+        values.put(USERNAME, jid.getLocalpart());
+        values.put(SERVER, jid.getDomainpart());
+        values.put(PASSWORD, password);
+        values.put(OPTIONS, options);
+        values.put(KEYS, this.keys.toString());
+        values.put(ROSTERVERSION, rosterVersion);
+        values.put(AVATAR, avatar);
+        return values;
+    }
 
-	public void setXmppConnection(final XmppConnection connection) {
-		this.xmppConnection = connection;
-	}
+    public void initOtrEngine(final XmppConnectionService context) {
+        this.otrEngine = new OtrEngine(context, this);
+    }
 
-	public String getOtrFingerprint() {
-		if (this.otrFingerprint == null) {
-			try {
-				if (this.otrEngine == null) {
-					return null;
-				}
-				final PublicKey publicKey = this.otrEngine.getPublicKey();
-				if (publicKey == null || !(publicKey instanceof DSAPublicKey)) {
-					return null;
-				}
-				this.otrFingerprint = new OtrCryptoEngineImpl().getFingerprint(publicKey);
-				return this.otrFingerprint;
-			} catch (final OtrCryptoException ignored) {
-				return null;
-			}
-		} else {
-			return this.otrFingerprint;
-		}
-	}
+    public OtrEngine getOtrEngine() {
+        return this.otrEngine;
+    }
 
-	public String getRosterVersion() {
-		if (this.rosterVersion == null) {
-			return "";
-		} else {
-			return this.rosterVersion;
-		}
-	}
+    public XmppConnection getXmppConnection() {
+        return this.xmppConnection;
+    }
 
-	public void setRosterVersion(final String version) {
-		this.rosterVersion = version;
-	}
+    public void setXmppConnection(final XmppConnection connection) {
+        this.xmppConnection = connection;
+    }
 
-	public int countPresences() {
-		return this.getRoster().getContact(this.getJid().toBareJid()).getPresences().size();
-	}
+    public String getOtrFingerprint() {
+        if (this.otrFingerprint == null) {
+            try {
+                if (this.otrEngine == null) {
+                    return null;
+                }
+                final PublicKey publicKey = this.otrEngine.getPublicKey();
+                if (publicKey == null || !(publicKey instanceof DSAPublicKey)) {
+                    return null;
+                }
+                this.otrFingerprint = new OtrCryptoEngineImpl().getFingerprint(publicKey);
+                return this.otrFingerprint;
+            } catch (final OtrCryptoException ignored) {
+                return null;
+            }
+        } else {
+            return this.otrFingerprint;
+        }
+    }
 
-	public String getPgpSignature() {
-		if (keys.has("pgp_signature")) {
-			try {
-				return keys.getString("pgp_signature");
-			} catch (final JSONException e) {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
+    public String getRosterVersion() {
+        if (this.rosterVersion == null) {
+            return "";
+        } else {
+            return this.rosterVersion;
+        }
+    }
 
-	public Roster getRoster() {
-		return this.roster;
-	}
+    public void setRosterVersion(final String version) {
+        this.rosterVersion = version;
+    }
 
-	public List<Bookmark> getBookmarks() {
-		return this.bookmarks;
-	}
+    public int countPresences() {
+        return this.getRoster().getContact(this.getJid().toBareJid()).getPresences().size();
+    }
 
-	public void setBookmarks(final List<Bookmark> bookmarks) {
-		this.bookmarks = bookmarks;
-	}
+    public String getPgpSignature() {
+        if (keys.has("pgp_signature")) {
+            try {
+                return keys.getString("pgp_signature");
+            } catch (final JSONException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 
-	public boolean hasBookmarkFor(final Jid conferenceJid) {
-		for (final Bookmark bookmark : this.bookmarks) {
-			final Jid jid = bookmark.getJid();
-			if (jid != null && jid.equals(conferenceJid.toBareJid())) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public Roster getRoster() {
+        return this.roster;
+    }
 
-	public boolean setAvatar(final String filename) {
-		if (this.avatar != null && this.avatar.equals(filename)) {
-			return false;
-		} else {
-			this.avatar = filename;
-			return true;
-		}
-	}
+    public List<Bookmark> getBookmarks() {
+        return this.bookmarks;
+    }
 
-	public String getAvatar() {
-		return this.avatar;
-	}
+    public void setBookmarks(final List<Bookmark> bookmarks) {
+        this.bookmarks = bookmarks;
+    }
 
-	public void activateGracePeriod() {
-		this.mEndGracePeriod = SystemClock.elapsedRealtime()
-			+ (Config.CARBON_GRACE_PERIOD * 1000);
-	}
+    public boolean hasBookmarkFor(final Jid conferenceJid) {
+        for (final Bookmark bookmark : this.bookmarks) {
+            final Jid jid = bookmark.getJid();
+            if (jid != null && jid.equals(conferenceJid.toBareJid())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public void deactivateGracePeriod() {
-		this.mEndGracePeriod = 0L;
-	}
+    public boolean setAvatar(final String filename) {
+        Log.i(TAG, "setAvatar=" + filename);
+        if (this.avatar != null && this.avatar.equals(filename)) {
+            return false;
+        } else {
+            this.avatar = filename;
+            return true;
+        }
+    }
 
-	public boolean inGracePeriod() {
-		return SystemClock.elapsedRealtime() < this.mEndGracePeriod;
-	}
+    public String getAvatar() {
+        Log.i(TAG, "getAvatar=" + avatar);
+        return this.avatar;
+    }
 
-	public String getShareableUri() {
-		final String fingerprint = this.getOtrFingerprint();
-		if (fingerprint != null) {
-			return "xmpp:" + this.getJid().toBareJid().toString() + "?otr-fingerprint="+fingerprint;
-		} else {
-			return "xmpp:" + this.getJid().toBareJid().toString();
-		}
-	}
+    public void activateGracePeriod() {
+        this.mEndGracePeriod = SystemClock.elapsedRealtime()
+                + (Config.CARBON_GRACE_PERIOD * 1000);
+    }
 
-	public boolean isBlocked(final ListItem contact) {
-		final Jid jid = contact.getJid();
-		return jid != null && (blocklist.contains(jid.toBareJid()) || blocklist.contains(jid.toDomainJid()));
-	}
+    public void deactivateGracePeriod() {
+        this.mEndGracePeriod = 0L;
+    }
 
-	public boolean isBlocked(final Jid jid) {
-		return jid != null && blocklist.contains(jid.toBareJid());
-	}
+    public boolean inGracePeriod() {
+        return SystemClock.elapsedRealtime() < this.mEndGracePeriod;
+    }
 
-	public Collection<Jid> getBlocklist() {
-		return this.blocklist;
-	}
+    public String getShareableUri() {
+        final String fingerprint = this.getOtrFingerprint();
+        if (fingerprint != null) {
+            return "xmpp:" + this.getJid().toBareJid().toString() + "?otr-fingerprint=" + fingerprint;
+        } else {
+            return "xmpp:" + this.getJid().toBareJid().toString();
+        }
+    }
 
-	public void clearBlocklist() {
-		getBlocklist().clear();
-	}
+    public boolean isBlocked(final ListItem contact) {
+        final Jid jid = contact.getJid();
+        return jid != null && (blocklist.contains(jid.toBareJid()) || blocklist.contains(jid.toDomainJid()));
+    }
 
-	public boolean isOnlineAndConnected() {
-		return this.getStatus() == State.ONLINE && this.getXmppConnection() != null;
-	}
+    public boolean isBlocked(final Jid jid) {
+        return jid != null && blocklist.contains(jid.toBareJid());
+    }
+
+    public Collection<Jid> getBlocklist() {
+        return this.blocklist;
+    }
+
+    public void clearBlocklist() {
+        getBlocklist().clear();
+    }
+
+    public boolean isOnlineAndConnected() {
+        return this.getStatus() == State.ONLINE && this.getXmppConnection() != null;
+    }
 }

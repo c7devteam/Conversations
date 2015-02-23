@@ -1,4 +1,18 @@
 include ':libs:MemorizingTrustManager'
+include ':libs:minidns'
 include ':libs:openpgp-api-lib'
 
 rootProject.name = 'Conversations'
+
+include ':cube7API'
+project(':cube7API').projectDir = new File(settingsDir, '../BonofaLib/cube7API')
+
+include ':bonofaGcm'
+project(':bonofaGcm').projectDir = new File(settingsDir, '../BonofaLib/bonofaGcm')
+
+include ':angelsConnection'
+project(':angelsConnection').projectDir = new File(settingsDir, '../Library/angelsConnection')
+
+include ':angelsMedia'
+project(':angelsMedia').projectDir = new File(settingsDir, '../Library/angelsMedia')
+

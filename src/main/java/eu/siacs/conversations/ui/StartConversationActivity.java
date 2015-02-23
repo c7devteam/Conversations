@@ -176,7 +176,15 @@ public class StartConversationActivity extends XmppActivity implements OnRosterU
 
 	@Override
 	public void onRosterUpdate() {
-		this.refreshUi();
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (mSearchEditText != null) {
+					filter(mSearchEditText.getText().toString());
+				}
+			}
+		});
 	}
 
 	@Override
@@ -574,15 +582,9 @@ public class StartConversationActivity extends XmppActivity implements OnRosterU
 				this.mActivatedAccounts.add(account.getJid().toBareJid().toString());
 			}
 		}
-		final Intent intent = getIntent();
-		final ActionBar ab = getActionBar();
-		if (intent != null && intent.getBooleanExtra("init",false) && ab != null) {
-			ab.setDisplayShowHomeEnabled(false);
-			ab.setDisplayHomeAsUpEnabled(false);
-			ab.setHomeButtonEnabled(false);
-		}
 		this.mKnownHosts = xmppConnectionService.getKnownHosts();
-		this.mKnownConferenceHosts = xmppConnectionService.getKnownConferenceHosts();
+		this.mKnownConferenceHosts = xmppConnectionService
+			.getKnownConferenceHosts();
 		if (this.mPendingInvite != null) {
 			mPendingInvite.invite();
 			this.mPendingInvite = null;
@@ -709,14 +711,15 @@ public class StartConversationActivity extends XmppActivity implements OnRosterU
 
 	@Override
 	public void OnUpdateBlocklist(final Status status) {
-		refreshUi();
-	}
+		runOnUiThread(new Runnable() {
 
-	@Override
-	protected void refreshUiReal() {
-		if (mSearchEditText != null) {
-			filter(mSearchEditText.getText().toString());
-		}
+			@Override
+			public void run() {
+				if (mSearchEditText != null) {
+					filter(mSearchEditText.getText().toString());
+				}
+			}
+		});
 	}
 
 	public static class MyListFragment extends ListFragment {

@@ -28,23 +28,26 @@ public class DNSHelper {
 	protected static Client client = new Client();
 
 	public static Bundle getSRVRecord(final Jid jid) throws IOException {
-        final String host = jid.getDomainpart();
-		String dns[] = client.findDNS();
-
-		if (dns != null) {
-			for (String dnsserver : dns) {
-				InetAddress ip = InetAddress.getByName(dnsserver);
-				Bundle b = queryDNS(host, ip);
-				if (b.containsKey("values")) {
-					return b;
-				} else if (b.containsKey("error")
-						&& "nosrv".equals(b.getString("error", null))) {
-					return b;
-				}
-			}
-		}
-		return queryDNS(host, InetAddress.getByName("8.8.8.8"));
+		return getSRVRecord(jid.getDomainpart());
 	}
+
+    public static Bundle getSRVRecord(final String host) throws IOException {
+        String dns[] = client.findDNS();
+
+        if (dns != null) {
+            for (String dnsserver : dns) {
+                InetAddress ip = InetAddress.getByName(dnsserver);
+                Bundle b = queryDNS(host, ip);
+                if (b.containsKey("values")) {
+                    return b;
+                } else if (b.containsKey("error")
+                        && "nosrv".equals(b.getString("error", null))) {
+                    return b;
+                }
+            }
+        }
+        return queryDNS(host, InetAddress.getByName("8.8.8.8"));
+    }
 
 	public static Bundle queryDNS(String host, InetAddress dnsServer) {
 		Bundle bundle = new Bundle();
@@ -140,13 +143,18 @@ public class DNSHelper {
 			}
 			ArrayList<Bundle> values = new ArrayList<>();
 			for (SRV srv : result) {
+				boolean added = false;
 				if (ips6.containsKey(srv.getName())) {
 					values.add(createNamePortBundle(srv.getName(),srv.getPort(),ips6));
+					added = true;
 				}
 				if (ips4.containsKey(srv.getName())) {
 					values.add(createNamePortBundle(srv.getName(),srv.getPort(),ips4));
+					added = true;
 				}
-				values.add(createNamePortBundle(srv.getName(),srv.getPort(),null));
+				if (!added) {
+					values.add(createNamePortBundle(srv.getName(),srv.getPort(),null));
+				}
 			}
 			bundle.putParcelableArrayList("values", values);
 		} catch (SocketTimeoutException e) {
