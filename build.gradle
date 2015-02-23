@@ -61,29 +61,31 @@ android {
 // mKeyAlias=alias
 // mKeyPassword=xxx
 //
-    if (project.hasProperty('mStoreFile') &&
-            project.hasProperty('mStorePassword') &&
-            project.hasProperty('mKeyAlias') &&
-            project.hasProperty('mKeyPassword')) {
-        signingConfigs {
-            release {
-                storeFile file(mStoreFile)
-                storePassword mStorePassword
-                keyAlias mKeyAlias
-                keyPassword mKeyPassword
-            }
-        }
-        buildTypes.release.signingConfig = signingConfigs.release
-    } else {
+    if (project.hasProperty('mDebugStoreFile') &&
+            project.hasProperty('mDebugStorePassword') &&
+            project.hasProperty('mDebugKeyAlias') &&
+            project.hasProperty('mDebugKeyPassword')) {
         signingConfigs {
             debug {
-                keyAlias 'bonofa-android-app-test'
-                keyPassword 'pvzHI9le34az555'
-                storeFile file('/Users/zxui/Dropbox/bonofa.keystore')
-                storePassword '9aHS96nk0pgawBt'
+                storeFile file(project.getProperties().get('mDebugStoreFile'))
+                storePassword project.getProperties().get('mDebugStorePassword')
+                keyAlias project.getProperties().get('mDebugKeyAlias')
+                keyPassword project.getProperties().get('mDebugKeyPassword')
             }
         }
-        buildTypes.release.signingConfig = signingConfigs.debug
+    }
+    if (project.hasProperty('mReleaseStoreFile') &&
+            project.hasProperty('mReleaseStorePassword') &&
+            project.hasProperty('mReleaseKeyAlias') &&
+            project.hasProperty('mReleaseKeyPassword')) {
+        signingConfigs {
+            release {
+                storeFile file(project.getProperties().get('mReleaseStoreFile'))
+                storePassword project.getProperties().get('mReleaseStorePassword')
+                keyAlias project.getProperties().get('mReleaseKeyAlias')
+                keyPassword project.getProperties().get('mReleaseKeyPassword')
+            }
+        }
     }
     applicationVariants.all { variant ->
         if (variant.name.equals('release')) {
