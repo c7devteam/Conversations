@@ -9,7 +9,10 @@ public final class Config implements Cube7Config {
     public static final boolean IS_CUBE7 = true;
     public static final boolean IS_TEST = true;
     public static final String HOST_DEFAULT = IS_CUBE7 ? (IS_TEST ? HOST_MESSENGER7_TEST : HOST_MESSENGER7) : null;
-
+    public static final boolean ROUND = true;
+    public static final int AVATAR_SIZE_SMALL = 24;
+    public static final int AVATAR_SIZE_MIDDLE = 32;
+    public static final int AVATAR_SIZE_LARGE = 48;
     public static final String LOGTAG = "conversations";
 
     public static final int PING_MAX_INTERVAL = 300;

@@ -19,7 +19,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -68,7 +68,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         super(activity, 0, messages);
         this.activity = activity;
         this.audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
-        this.audioManager.setMode(AudioManager.MODE_IN_CALL);
+        this.audioManager.setMode(AudioManager.MODE_NORMAL);
         this.mediaPlayer = new MediaPlayer();
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -293,7 +293,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         viewHolder.image.setVisibility(View.GONE);
         viewHolder.messageBody.setVisibility(View.GONE);
         viewHolder.download_button.setVisibility(View.VISIBLE);
-        viewHolder.download_button.setText(text);
+//        viewHolder.download_button.setText(text);
         viewHolder.download_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -305,10 +305,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     }
 
     private void displayOpenableMessage(ViewHolder viewHolder, final Message message) {
+
         viewHolder.image.setVisibility(View.GONE);
         viewHolder.messageBody.setVisibility(View.GONE);
         viewHolder.download_button.setVisibility(View.VISIBLE);
-        viewHolder.download_button.setText(activity.getString(R.string.open_x_file, UIHelper.getFileDescriptionString(activity, message)));
+//        viewHolder.download_button.setText(activity.getString(R.string.open_x_file, UIHelper.getFileDescriptionString(activity, message)));
         viewHolder.download_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -316,6 +317,13 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                 openDownloadable(message);
             }
         });
+        viewHolder.message_box.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDownloadable(message);
+            }
+        });
+
         viewHolder.download_button.setOnLongClickListener(openContextMenu);
     }
 
@@ -324,6 +332,10 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         if (viewHolder.download_button != null) {
             viewHolder.download_button.setVisibility(View.GONE);
         }
+//        if (viewHolder.message_audio!=null){
+//            viewHolder.message_audio.setVisibility(View.GONE);
+//        }
+
         viewHolder.messageBody.setVisibility(View.GONE);
         viewHolder.image.setVisibility(View.VISIBLE);
         ImageParams params = message.getImageParams();
@@ -372,9 +384,11 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                             R.layout.message_sent, parent, false);
                     viewHolder.message_box = (LinearLayout) view
                             .findViewById(R.id.message_box);
+//                    viewHolder.message_audio =(ImageButton) view
+//                            .findViewById(R.id.message_audio);
                     viewHolder.contact_picture = (ImageView) view
                             .findViewById(R.id.message_photo);
-                    viewHolder.download_button = (Button) view
+                    viewHolder.download_button = (ImageButton) view
                             .findViewById(R.id.download_button);
                     viewHolder.indicator = (ImageView) view
                             .findViewById(R.id.security_indicator);
@@ -394,7 +408,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
                             .findViewById(R.id.message_box);
                     viewHolder.contact_picture = (ImageView) view
                             .findViewById(R.id.message_photo);
-                    viewHolder.download_button = (Button) view
+                    viewHolder.download_button = (ImageButton) view
                             .findViewById(R.id.download_button);
                     viewHolder.indicator = (ImageView) view
                             .findViewById(R.id.security_indicator);
@@ -428,7 +442,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             if (conversation.getMode() == Conversation.MODE_SINGLE) {
                 viewHolder.contact_picture.setImageBitmap(activity
                         .avatarService().get(conversation.getContact(),
-                                activity.getPixel(32)));
+                                activity.getPixel(Config.AVATAR_SIZE_SMALL), Config.ROUND));
                 viewHolder.contact_picture.setAlpha(0.5f);
                 viewHolder.status_message.setText(
                         activity.getString(R.string.contact_has_read_up_to_this_point, conversation.getName()));
@@ -457,16 +471,15 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         } else if (type == RECEIVED) {
             Contact contact = message.getContact();
             if (contact != null) {
-                viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(contact, activity.getPixel(48)));
+                viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(contact, activity.getPixel(Config.AVATAR_SIZE_MIDDLE), Config.ROUND));
             } else if (conversation.getMode() == Conversation.MODE_MULTI) {
                 viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(
                         UIHelper.getMessageDisplayName(message),
-                        activity.getPixel(48)));
+                        activity.getPixel(Config.AVATAR_SIZE_MIDDLE)));
             }
         } else if (type == SENT) {
-            viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(account, activity.getPixel(48)));
+            viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(account, activity.getPixel(Config.AVATAR_SIZE_MIDDLE), Config.ROUND));
         }
-
         viewHolder.contact_picture
                 .setOnClickListener(new OnClickListener() {
 
@@ -557,8 +570,9 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
             }
-            mediaPlayer.reset();
             try {
+                mediaPlayer.reset();
+                mediaPlayer.setVolume(1, 1);
                 mediaPlayer.setDataSource(file.getAbsolutePath());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -566,12 +580,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
             return;
         }
-
-
         if (!file.exists()) {
             Toast.makeText(activity, R.string.file_deleted, Toast.LENGTH_SHORT).show();
             return;
@@ -599,7 +609,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     private static class ViewHolder {
 
         protected LinearLayout message_box;
-        protected Button download_button;
+        protected ImageButton download_button;
         protected ImageView image;
         protected ImageView indicator;
         protected ImageView indicatorReceived;

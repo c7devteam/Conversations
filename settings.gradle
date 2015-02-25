@@ -16,3 +16,5 @@ project(':angelsConnection').projectDir = new File(settingsDir, '../Library/ange
 include ':angelsMedia'
 project(':angelsMedia').projectDir = new File(settingsDir, '../Library/angelsMedia')
 
+include ':transmit7lib'
+project(':transmit7lib').projectDir = new File(settingsDir, '../Transmit7/transmit7lib')

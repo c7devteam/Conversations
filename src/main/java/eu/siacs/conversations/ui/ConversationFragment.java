@@ -9,13 +9,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
-import android.content.res.AssetFileDescriptor;
-import android.media.MediaPlayer;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
@@ -42,13 +42,13 @@ import android.widget.Toast;
 import net.java.otr4j.session.SessionStatus;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import angels.zhuoxiu.media.audio.AudioRecordDialog;
 import angels.zhuoxiu.media.audio.AudioRecorder;
 import eu.siacs.conversations.R;
 import eu.siacs.conversations.crypto.PgpEngine;
@@ -264,95 +264,87 @@ public class ConversationFragment extends Fragment {
         }
     };
 
-    boolean isRecording = false;
-    File audioFile;
-    AudioRecorder mAudioRecorder;
-    MediaPlayer mMediaPlayer;
+
     private View.OnTouchListener mAudioRecordListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    startAudioRecord();
+                    mSoundPool.play(ding, 0.5f, 0.5f, 0, 0, 1);
+                    startAudioRecord(100);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     break;
                 case MotionEvent.ACTION_UP:
-                    stopAudioRecord();
+                    stopAudioRecord(100);
                     break;
             }
             return false;
         }
     };
 
+    AudioRecordDialog recordDialog;
 
-    void startAudioRecord() {
-        int delay = 0;
-        try {
-            MediaPlayer mediaPlayer = new MediaPlayer();
-            AssetFileDescriptor fileDescriptor = getResources().getAssets().openFd("ding.wav");
-            mediaPlayer.setDataSource(fileDescriptor.getFileDescriptor(), fileDescriptor.getStartOffset(), fileDescriptor.getLength());
-            mediaPlayer.prepare();
-            delay = mediaPlayer.getDuration();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+    void startAudioRecord(int delay) {
+        if (recordDialog == null) {
+            recordDialog = new AudioRecordDialog(getActivity());
+            recordDialog.setCancelable(false);
         }
-        mAudioRecorder =
-                AudioRecorder.getInstance(getActivity(), new AudioRecorder.AudioRecordListener() {
-                    @Override
-                    public void onStart() {
+        recordDialog.show();
+        if (mAudioRecorder == null) {
+            mAudioRecorder =
+                    AudioRecorder.getInstance(getActivity(), new AudioRecorder.AudioRecordListener() {
 
-                    }
+                        @Override
+                        public void onStart() {
+                        }
 
-                    @Override
-                    public void onTiming(long currentTime, long totalTime) {
+                        @Override
+                        public void onTiming(long currentTime, int level) {
+                            Log.i(TAG, "level=" + level);
+                            recordDialog.setRecordVolume(level / (10000 / 5) + 1);
+                            recordDialog.setRecordTime(currentTime);
+                        }
 
-                    }
+                        @Override
+                        public void onStop(final File audioFile) {
+                            mSoundPool.play(dang, 0.5f, 0.5f, 0, 0, 1);
+                            recordDialog.cancel();
+                            ConversationActivity activity = (ConversationActivity) getActivity();
+                            activity.onActivityResult(ConversationActivity.ATTACHMENT_CHOICE_RECORD_VOICE, Activity.RESULT_OK, getActivity().getIntent().setData(Uri.fromFile(audioFile)));
+                        }
 
-                    @Override
-                    public void onStop(final File audioFile) {
-                        ConversationActivity activity = (ConversationActivity) getActivity();
-                        activity.onActivityResult(ConversationActivity.ATTACHMENT_CHOICE_RECORD_VOICE, Activity.RESULT_OK, getActivity().getIntent().setData(Uri.fromFile(audioFile)));
-                    }
+                        @Override
+                        public void onError(String message) {
 
-                    @Override
-                    public void onError(String message) {
+                        }
+                    });
+        }
+        if (mAudioRecorder.isRecording()) {
+            mAudioRecorder.stopRecording();
+        }
 
-                    }
-                });
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 mAudioRecorder.startRecording();
-                isRecording = true;
+                mAudioRecordButton.setImageResource(R.drawable.ic_mic_active);
             }
-        },delay);
-        mAudioRecordButton.setImageResource(R.drawable.ic_mic_active);
+        }, delay);
+
     }
 
-    void stopAudioRecord() {
-        if (mAudioRecorder != null && isRecording) {
-            try {
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                AssetFileDescriptor fileDescriptor = getResources().getAssets().openFd("dang.mp3");
-                mediaPlayer.setDataSource(fileDescriptor.getFileDescriptor(), fileDescriptor.getStartOffset(), fileDescriptor.getLength());
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
+    void stopAudioRecord(int delay) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mAudioRecorder != null && mAudioRecorder.isRecording()) {
                     mAudioRecorder.stopRecording();
-                    isRecording = false;
                     mAudioRecordButton.setImageResource(R.drawable.ic_mic_inactive);
                 }
-            },500);
-        }
+            }
+        },delay);
     }
-
 
     private OnClickListener mSendButtonListener = new OnClickListener() {
 
@@ -437,6 +429,10 @@ public class ConversationFragment extends Fragment {
             mEditMessage.setInputType(mEditMessage.getInputType() | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE);
         }
     }
+
+    File audioFile;
+    AudioRecorder mAudioRecorder;
+    SoundPool mSoundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
 
     @Override
     public View onCreateView(final LayoutInflater inflater,
@@ -525,8 +521,15 @@ public class ConversationFragment extends Fragment {
                 });
         messagesView.setAdapter(messageListAdapter);
         registerForContextMenu(messagesView);
-
+        initSoundPool();
         return view;
+    }
+
+    int ding, dang;
+
+    void initSoundPool() {
+        ding = mSoundPool.load(getActivity(), R.raw.ding, 1);
+        dang = mSoundPool.load(getActivity(), R.raw.dang, 1);
     }
 
     @Override
