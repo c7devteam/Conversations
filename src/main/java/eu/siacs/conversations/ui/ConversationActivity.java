@@ -28,13 +28,16 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.Toast;
 
+import com.bonofa.api.messenger7.Messenger7API;
 import com.bonofa.gcm.GcmManager;
 
 import net.java.otr4j.session.SessionStatus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import angels.zhuoxiu.media.api.FileUtils;
 import eu.siacs.conversations.R;
 import eu.siacs.conversations.entities.Account;
 import eu.siacs.conversations.entities.Blockable;
@@ -142,7 +145,6 @@ public class ConversationActivity extends XmppActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GcmManager gcmManager = GcmManager.instance(this, GcmManager.BONOFA_PROJECT.MESSENGER7);
-
         if (savedInstanceState != null) {
             mOpenConverstaion = savedInstanceState.getString(
                     STATE_OPEN_CONVERSATION, null);
@@ -922,6 +924,27 @@ public class ConversationActivity extends XmppActivity
         prepareFileToast = Toast.makeText(getApplicationContext(),
                 getText(R.string.preparing_image), Toast.LENGTH_LONG);
         prepareFileToast.show();
+        if (true) {
+            File file = FileUtils.getFileByUri(this, uri);
+            Log.i(TAG, "file=" + file);
+            if (file != null && file.exists()) {
+                getSelectedConversation().getAccount().getMessenger7API().upload(new Messenger7API.FileUploadCallback() {
+                    @Override
+                    public void onProgress(int bytesWritten, int totalSize) {
+
+                    }
+
+                    @Override
+                    public void onFinish(boolean success, String... messages) {
+                        if (success) {
+                        } else {
+                            Toast.makeText(getApplicationContext(), messages[0], Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }, file);
+            }
+            return;
+        }
         xmppConnectionService.attachImageToConversation(conversation, uri,
                 new UiCallback<Message>() {
 

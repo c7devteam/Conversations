@@ -39,6 +39,8 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.bonofa.api.messenger7.Messenger7API;
+
 import net.java.otr4j.session.SessionStatus;
 
 import java.io.File;
@@ -50,6 +52,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import angels.zhuoxiu.media.audio.AudioRecordDialog;
 import angels.zhuoxiu.media.audio.AudioRecorder;
+import eu.siacs.conversations.Config;
 import eu.siacs.conversations.R;
 import eu.siacs.conversations.crypto.PgpEngine;
 import eu.siacs.conversations.entities.Account;
@@ -122,7 +125,6 @@ public class ConversationFragment extends Fragment {
     private TextView snackbarAction;
     private boolean messagesLoaded = true;
     private Toast messageLoaderToast;
-
     private OnScrollListener mOnScrollListener = new OnScrollListener() {
 
         @Override

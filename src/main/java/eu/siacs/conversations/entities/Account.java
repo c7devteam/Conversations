@@ -6,6 +6,8 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bonofa.api.messenger7.Messenger7API;
+
 import net.java.otr4j.crypto.OtrCryptoEngineImpl;
 import net.java.otr4j.crypto.OtrCryptoException;
 
@@ -28,7 +30,7 @@ import eu.siacs.conversations.xmpp.jid.InvalidJidException;
 import eu.siacs.conversations.xmpp.jid.Jid;
 
 public class Account extends AbstractEntity {
-    public static final String TAG=Account.class.getSimpleName();
+    public static final String TAG = Account.class.getSimpleName();
 
     public static final String TABLENAME = "accounts";
 
@@ -423,5 +425,9 @@ public class Account extends AbstractEntity {
 
     public boolean isOnlineAndConnected() {
         return this.getStatus() == State.ONLINE && this.getXmppConnection() != null;
+    }
+
+    public Messenger7API getMessenger7API() {
+        return Messenger7API.getInstance(jid.toBareJid().toString(), Config.IS_RELEASE);
     }
 }
