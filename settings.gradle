@@ -4,11 +4,17 @@ include ':libs:openpgp-api-lib'
 
 rootProject.name = 'Conversations'
 
-include ':cube7API'
-project(':cube7API').projectDir = new File(settingsDir, '../BonofaLib/cube7API')
+include ':bonofaAPI'
+project(':bonofaAPI').projectDir = new File(settingsDir, '../BonofaLib/bonofaAPI')
 
 include ':bonofaGcm'
 project(':bonofaGcm').projectDir = new File(settingsDir, '../BonofaLib/bonofaGcm')
+
+include ':bonofaTheme'
+project(':bonofaTheme').projectDir = new File(settingsDir, '../BonofaLib/bonofaTheme')
+
+include ':angelsTheme'
+project(':angelsTheme').projectDir = new File(settingsDir, '../Library/angelsTheme')
 
 include ':angelsConnection'
 project(':angelsConnection').projectDir = new File(settingsDir, '../Library/angelsConnection')

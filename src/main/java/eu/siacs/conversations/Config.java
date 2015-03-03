@@ -2,14 +2,18 @@ package eu.siacs.conversations;
 
 import android.graphics.Bitmap;
 
-import com.bonofa.cube7api.Cube7Config;
+import com.bonofa.api.messenger7.Messenger7Config;
 
-public final class Config implements Cube7Config {
+public final class Config implements Messenger7Config {
+    public static enum SHAPE {CIRCLE, SQUARE}
 
-    public static final boolean IS_CUBE7 = true;
-    public static final boolean IS_TEST = true;
-    public static final String HOST_DEFAULT = IS_CUBE7 ? (IS_TEST ? HOST_MESSENGER7_TEST : HOST_MESSENGER7) : null;
-    public static final boolean ROUND = true;
+    ;
+    public static SHAPE AVATAR_SHAPE = SHAPE.CIRCLE;
+
+    public static final boolean IS_MESSENGER7 = true;
+    public static final boolean IS_RELEASE = false;
+    public static final String HOST_DEFAULT = IS_MESSENGER7 ? (IS_RELEASE ? HOST_MESSENGER7_XMPP_RELEASE : HOST_MESSENGER7_XMPP_DEBUG) : null;
+
     public static final int AVATAR_SIZE_SMALL = 24;
     public static final int AVATAR_SIZE_MIDDLE = 32;
     public static final int AVATAR_SIZE_LARGE = 48;
@@ -23,7 +27,7 @@ public final class Config implements Cube7Config {
     public static final int MINI_GRACE_PERIOD = 750;
 
     public static final int AVATAR_SIZE = 192;
-    public static final Bitmap.CompressFormat AVATAR_FORMAT = Bitmap.CompressFormat.WEBP;
+    public static final Bitmap.CompressFormat AVATAR_FORMAT = Bitmap.CompressFormat.JPEG;
 
     public static final int MESSAGE_MERGE_WINDOW = 20;
 

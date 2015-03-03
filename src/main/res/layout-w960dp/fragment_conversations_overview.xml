@@ -9,14 +9,14 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/primarybackground"
+        android:background="@color/primaryBackground"
         android:orientation="vertical" >
 
         <ListView
             android:id="@+id/list"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primarybackground"
+            android:background="@color/primaryBackground"
             android:divider="@color/divider"
             android:dividerHeight="1dp" />
     </LinearLayout>

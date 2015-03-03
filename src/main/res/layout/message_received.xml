@@ -14,14 +14,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/message_photo"
-        android:background="@drawable/message_border"
+        android:background="@drawable/message_border_received"
         android:minHeight="48dp"
+
         android:longClickable="true">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:background="@color/primarybackground"
+            android:background="@color/primaryBackground"
             android:gravity="center_vertical"
             android:orientation="vertical"
             android:paddingBottom="4dp"
@@ -34,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                android:background="@color/primarytext"
+                android:background="@color/primaryText"
                 android:paddingBottom="2dp"
                 android:scaleType="centerCrop" />
 
@@ -43,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
-                android:textColor="@color/primarytext"
+                android:textColor="@color/primaryText"
                 android:textSize="?attr/TextSizeBody" />
 
             <ImageButton
@@ -81,7 +82,7 @@
                     android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
                     android:text="@string/sending"
-                    android:textColor="@color/secondarytext"
+                    android:textColor="@color/secondaryText"
                     android:textSize="?attr/TextSizeInfo" />
             </LinearLayout>
         </LinearLayout>

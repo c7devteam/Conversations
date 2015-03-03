@@ -722,6 +722,7 @@ public class ConversationFragment extends Fragment {
     }
 
     public void updateMessages() {
+        Log.i(TAG,"updateMessages");
         synchronized (this.messageList) {
             if (getView() == null) {
                 return;

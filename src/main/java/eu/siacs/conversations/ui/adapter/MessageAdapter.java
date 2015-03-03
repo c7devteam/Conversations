@@ -366,11 +366,18 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     }
 
     @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        Log.i(TAG,"notifyDataSetChanged");
+    }
+
+    @Override
     public View getView(int position, View view, ViewGroup parent) {
         final Message message = getItem(position);
         final Conversation conversation = message.getConversation();
         final Account account = conversation.getAccount();
         final int type = getItemViewType(position);
+
         ViewHolder viewHolder;
         if (view == null) {
             viewHolder = new ViewHolder();
@@ -442,7 +449,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             if (conversation.getMode() == Conversation.MODE_SINGLE) {
                 viewHolder.contact_picture.setImageBitmap(activity
                         .avatarService().get(conversation.getContact(),
-                                activity.getPixel(Config.AVATAR_SIZE_SMALL), Config.ROUND));
+                                activity.getPixel(Config.AVATAR_SIZE_SMALL)));
                 viewHolder.contact_picture.setAlpha(0.5f);
                 viewHolder.status_message.setText(
                         activity.getString(R.string.contact_has_read_up_to_this_point, conversation.getName()));
@@ -471,14 +478,14 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         } else if (type == RECEIVED) {
             Contact contact = message.getContact();
             if (contact != null) {
-                viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(contact, activity.getPixel(Config.AVATAR_SIZE_MIDDLE), Config.ROUND));
+                viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(contact, activity.getPixel(Config.AVATAR_SIZE_MIDDLE)));
             } else if (conversation.getMode() == Conversation.MODE_MULTI) {
                 viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(
                         UIHelper.getMessageDisplayName(message),
                         activity.getPixel(Config.AVATAR_SIZE_MIDDLE)));
             }
         } else if (type == SENT) {
-            viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(account, activity.getPixel(Config.AVATAR_SIZE_MIDDLE), Config.ROUND));
+            viewHolder.contact_picture.setImageBitmap(activity.avatarService().get(account, activity.getPixel(Config.AVATAR_SIZE_MIDDLE)));
         }
         viewHolder.contact_picture
                 .setOnClickListener(new OnClickListener() {

@@ -21,7 +21,9 @@
 
 
         <LinearLayout
-            android:background="@drawable/message_border"
+            android:background="@drawable/message_border_sent"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:backgroundTintMode="src_in"
             android:id="@+id/text_box"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
@@ -38,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                android:background="@color/primarytext"
+                android:background="@color/primaryText"
                 android:paddingBottom="2dp"
                 android:scaleType="centerCrop" />
 
@@ -59,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
-                android:textColor="@color/primarytext"
+                android:textColor="@color/primaryText"
                 android:textSize="?attr/TextSizeBody" />
 
             <LinearLayout
@@ -76,7 +78,7 @@
                     android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
                     android:text="@string/sending"
-                    android:textColor="@color/secondarytext"
+                    android:textColor="@color/secondaryText"
                     android:textSize="?attr/TextSizeInfo" />
 
                 <ImageView

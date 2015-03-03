@@ -1,7 +1,6 @@
 package eu.siacs.conversations.services;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import eu.siacs.conversations.Config;
 import eu.siacs.conversations.entities.Account;
 import eu.siacs.conversations.entities.Bookmark;
 import eu.siacs.conversations.entities.Contact;
@@ -43,9 +43,9 @@ public class AvatarService {
         this.mXmppConnectionService = service;
     }
 
-    public Bitmap getRoundBitmap(Bitmap origin){
-        Canvas canvasOrigin=new Canvas(origin);
-        Bitmap rounder = Bitmap.createBitmap(origin.getWidth(),origin.getHeight(),Bitmap.Config.ARGB_8888);
+    public Bitmap getCircleBitmap(Bitmap origin) {
+        Canvas canvasOrigin = new Canvas(origin);
+        Bitmap rounder = Bitmap.createBitmap(origin.getWidth(), origin.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvasRound = new Canvas(rounder);
 
         Paint xferPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -62,12 +62,9 @@ public class AvatarService {
         return origin;
     }
 
-    public Bitmap get(final Contact contact, final int size) {
-        return get(contact, size, false);
-    }
 
-    public Bitmap get(final Contact contact, final int size, boolean round) {
-        final String KEY = key(contact, size, round);
+    public Bitmap get(final Contact contact, final int size) {
+        final String KEY = key(contact, size);
         Bitmap avatar = this.mXmppConnectionService.getBitmapCache().get(KEY);
         if (avatar != null) {
             return avatar;
@@ -81,8 +78,14 @@ public class AvatarService {
         if (avatar == null) {
             avatar = get(contact.getDisplayName(), size);
         }
-        if (avatar != null && round) {
-            avatar = getRoundBitmap(avatar);
+        switch (Config.AVATAR_SHAPE){
+            case CIRCLE:
+                avatar = getCircleBitmap(avatar);
+                break;
+            case SQUARE:
+                break;
+            default:
+                break;
         }
         this.mXmppConnectionService.getBitmapCache().put(KEY, avatar);
         return avatar;
@@ -99,17 +102,13 @@ public class AvatarService {
     }
 
     private String key(Contact contact, int size) {
-        return key(contact, size, false);
-    }
-
-    private String key(Contact contact, int size, boolean round) {
         synchronized (this.sizes) {
             if (!this.sizes.contains(size)) {
                 this.sizes.add(size);
             }
         }
         return PREFIX_CONTACT + "_" + contact.getAccount().getJid().toBareJid() + "_"
-                + contact.getJid() + "_" + String.valueOf(size) + (round ? "_round" : "");
+                + contact.getJid() + "_" + String.valueOf(size) + Config.AVATAR_SHAPE;
     }
 
     public Bitmap get(ListItem item, int size) {
@@ -207,10 +206,6 @@ public class AvatarService {
     }
 
     public Bitmap get(Account account, int size) {
-        return get(account, size, false);
-    }
-
-    public Bitmap get(Account account, int size, boolean round) {
         final String KEY = key(account, size);
         Bitmap avatar = mXmppConnectionService.getBitmapCache().get(KEY);
         if (avatar != null) {
@@ -221,8 +216,15 @@ public class AvatarService {
         if (avatar == null) {
             avatar = get(account.getJid().toBareJid().toString(), size);
         }
-        if (avatar != null && round) {
-            avatar = getRoundBitmap(avatar);
+
+        switch (Config.AVATAR_SHAPE) {
+            case CIRCLE:
+                avatar = getCircleBitmap(avatar);
+                break;
+            case SQUARE:
+                break;
+            default:
+                break;
         }
         mXmppConnectionService.getBitmapCache().put(KEY, avatar);
         return avatar;
@@ -237,23 +239,15 @@ public class AvatarService {
         }
     }
 
+
     private String key(Account account, int size) {
         synchronized (this.sizes) {
             if (!this.sizes.contains(size)) {
                 this.sizes.add(size);
             }
         }
-        return key(account, size, false);
-    }
-
-    private String key(Account account, int size, boolean round) {
-        synchronized (this.sizes) {
-            if (!this.sizes.contains(size)) {
-                this.sizes.add(size);
-            }
-        }
         return PREFIX_ACCOUNT + "_" + account.getUuid() + "_"
-                + String.valueOf(size) + (round ? "_round" : "");
+                + String.valueOf(size) + Config.AVATAR_SHAPE;
     }
 
     public Bitmap get(final String name, final int size) {

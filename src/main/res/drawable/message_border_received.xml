@@ -12,5 +12,6 @@
     <stroke
         android:color="@color/divider"
         android:width="0.5dp" />
-
+    <solid android:color="@android:color/white" />
 </shape>
+

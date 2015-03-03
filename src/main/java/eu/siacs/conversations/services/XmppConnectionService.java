@@ -59,6 +59,7 @@ import eu.siacs.conversations.entities.Message;
 import eu.siacs.conversations.entities.MucOptions;
 import eu.siacs.conversations.entities.MucOptions.OnRenameListener;
 import eu.siacs.conversations.entities.Presences;
+import eu.siacs.conversations.entities.Roster;
 import eu.siacs.conversations.generator.IqGenerator;
 import eu.siacs.conversations.generator.MessageGenerator;
 import eu.siacs.conversations.generator.PresenceGenerator;
@@ -1860,7 +1861,8 @@ public class XmppConnectionService extends Service implements OnPhoneContactsLoa
      * @param sha1sum
      */
     public void fetchAvatar(Account account, Jid fromJid, String sha1sum) {
-        final Contact contact = account.getRoster().getContact(fromJid);
+        final Roster roster = account.getRoster();
+        final Contact contact = roster.getContact(fromJid);
         Log.i(TAG, "contact=" + contact.getJid());
         if (contact != null) {
             final Avatar avatar = new Avatar();
@@ -1882,7 +1884,7 @@ public class XmppConnectionService extends Service implements OnPhoneContactsLoa
             sendIqPacket(account, iqPacket, new OnIqPacketReceived() {
                 @Override
                 public void onIqPacketReceived(Account account, IqPacket packet) {
-                    Log.e(TAG, "packet=" + packet);
+                    Log.e(TAG, "packet 1=" + packet);
                     Element vCard = packet.findChild("vCard", "vcard-temp");
                     if (vCard != null) {
                         Element photo = vCard.findChild("PHOTO");

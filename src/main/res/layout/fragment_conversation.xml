@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondarybackground">
+    android:background="@color/secondaryBackground">
 
     <ListView
         android:id="@+id/messages_view"
@@ -12,7 +12,7 @@
         android:layout_above="@+id/snackbar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@color/secondarybackground"
+        android:background="@color/secondaryBackground"
         android:divider="@null"
         android:dividerHeight="0dp"
         android:listSelector="@android:color/transparent"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:background="@color/primarybackground">
+        android:background="@color/primaryBackground">
 
         <ImageButton
             android:id="@+id/textMediaButton"
@@ -57,7 +57,7 @@
                 android:id="@+id/textInput"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/primarybackground"
+                android:background="@color/primaryBackground"
                 android:ems="10"
                 android:imeOptions="flagNoExtractUi|actionSend"
                 android:inputType="textShortMessage|textMultiLine|textCapSentences"
@@ -69,7 +69,7 @@
                 android:paddingTop="12dp"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:textColor="@color/primarytext">
+                android:textColor="@color/primaryText">
 
                 <requestFocus />
             </eu.siacs.conversations.ui.EditMessage>
@@ -107,7 +107,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/snackbar_action"
             android:paddingLeft="24dp"
-            android:textColor="@color/ondarktext"
+            android:textColor="@color/onDarkText"
             android:textSize="?attr/TextSizeBody" />
 
         <TextView
@@ -121,7 +121,7 @@
             android:paddingRight="24dp"
             android:paddingTop="16dp"
             android:textAllCaps="true"
-            android:textColor="@color/ondarktext"
+            android:textColor="@color/onDarkText"
             android:textSize="?attr/TextSizeBody"
             android:textStyle="bold" />
     </RelativeLayout>

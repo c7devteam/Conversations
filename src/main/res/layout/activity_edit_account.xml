@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondarybackground">
+    android:background="@color/secondaryBackground">
 
     <ScrollView
         android:layout_width="fill_parent"
@@ -47,7 +47,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/account_settings_jabber_id"
-                        android:textColor="@color/primarytext"
+                        android:textColor="@color/primaryText"
                         android:textSize="?attr/TextSizeBody" />
 
                     <AutoCompleteTextView
@@ -56,8 +56,8 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/account_settings_example_jabber_id"
                         android:inputType="textEmailAddress"
-                        android:textColor="@color/primarytext"
-                        android:textColorHint="@color/secondarytext"
+                        android:textColor="@color/primaryText"
+                        android:textColorHint="@color/secondaryText"
                         android:text="xiu03@bonofa.com"
                         android:textSize="?attr/TextSizeBody" />
 
@@ -66,7 +66,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/account_settings_password"
-                        android:textColor="@color/primarytext"
+                        android:textColor="@color/primaryText"
                         android:textSize="?attr/TextSizeBody" />
 
                     <EditText
@@ -76,8 +76,8 @@
                         android:hint="@string/password"
                         android:text="defaultpw"
                         android:inputType="textPassword"
-                        android:textColor="@color/primarytext"
-                        android:textColorHint="@color/secondarytext"
+                        android:textColor="@color/primaryText"
+                        android:textColorHint="@color/secondaryText"
                         android:textSize="?attr/TextSizeBody" />
 
                     <CheckBox
@@ -86,7 +86,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/register_account"
-                        android:textColor="@color/primarytext"
+                        android:textColor="@color/primaryText"
                         android:textSize="?attr/TextSizeBody" />
 
                     <TextView
@@ -94,7 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/account_settings_confirm_password"
-                        android:textColor="@color/primarytext"
+                        android:textColor="@color/primaryText"
                         android:textSize="?attr/TextSizeBody"
                         android:visibility="gone" />
 
@@ -106,8 +106,8 @@
                         android:hint="@string/confirm_password"
                         android:inputType="textPassword"
                         android:visibility="gone"
-                        android:textColor="@color/primarytext"
-                        android:textColorHint="@color/secondarytext"
+                        android:textColor="@color/primaryText"
+                        android:textColorHint="@color/secondaryText"
                         android:textSize="?attr/TextSizeBody" />
                 </LinearLayout>
             </RelativeLayout>
@@ -139,7 +139,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_session_established"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -147,7 +147,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -169,7 +169,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_pep"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -177,7 +177,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -190,7 +190,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_blocking"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -198,7 +198,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -211,7 +211,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_stream_management"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -219,7 +219,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -232,7 +232,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_roster_version"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -240,7 +240,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -253,7 +253,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_carbon_messages"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -261,7 +261,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -274,7 +274,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_mam"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -282,7 +282,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -295,7 +295,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/server_info_csi"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody" />
 
                         <TextView
@@ -303,7 +303,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="right"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             tools:ignore="RtlHardcoded" />
                     </TableRow>
@@ -326,14 +326,14 @@
                             android:id="@+id/otr_fingerprint"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/primarytext"
+                            android:textColor="@color/primaryText"
                             android:textSize="?attr/TextSizeBody"
                             android:typeface="monospace" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/secondarytext"
+                            android:textColor="@color/secondaryText"
                             android:textSize="?attr/TextSizeInfo"
                             android:text="@string/otr_fingerprint" />
                     </LinearLayout>
@@ -371,7 +371,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/cancel"
-            android:textColor="@color/primarytext" />
+            android:textColor="@color/primaryText" />
 
         <View
             android:layout_width="1dp"
@@ -388,7 +388,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:text="@string/save"
-            android:textColor="@color/secondarytext" />
+            android:textColor="@color/secondaryText" />
     </LinearLayout>
 
 </RelativeLayout>

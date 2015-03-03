@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:scrollHorizontally="false"
             android:singleLine="true"
-            android:textColor="@color/primarytext"
+            android:textColor="@color/primaryText"
             android:textSize="?attr/TextSizeHeadline" />
 
         <TextView
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/account_status_unknown"
-            android:textColor="@color/secondarytext"
+            android:textColor="@color/secondaryText"
             android:textSize="?attr/TextSizeBody"
             android:textStyle="bold" />
     </LinearLayout>
