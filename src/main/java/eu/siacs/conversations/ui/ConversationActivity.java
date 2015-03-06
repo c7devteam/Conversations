@@ -895,11 +895,38 @@ public class ConversationActivity extends XmppActivity
             }
         }
     }
+    boolean useMessenger7API=true;
 
     public void attachFileToConversation(Conversation conversation, Uri uri) {
         prepareFileToast = Toast.makeText(getApplicationContext(),
                 getText(R.string.preparing_file), Toast.LENGTH_LONG);
         prepareFileToast.show();
+        if (useMessenger7API) {
+            File file = FileUtils.getFileByUri(this, uri);
+            Log.i(TAG, "file=" + file);
+            if (file != null && file.exists()) {
+                getSelectedConversation().getAccount().getMessenger7API().upload(new Messenger7API.FileUploadCallback() {
+                    @Override
+                    public void onProgress(int bytesWritten, int totalSize) {
+
+                    }
+
+                    @Override
+                    public void onFinish(boolean success, final String... urls) {
+                        if (success) {
+                            if (urls.length > 0) {
+                                Log.d(TAG, "url=" + urls[0]);
+                                final Message message = new Message(getSelectedConversation(), urls[0], 0);
+                                xmppConnectionService.sendMessage(message);
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), urls[0], Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }, file);
+            }
+            return;
+        }
         xmppConnectionService.attachFileToConversation(conversation, uri, new UiCallback<Message>() {
             @Override
             public void success(Message message) {
@@ -920,11 +947,11 @@ public class ConversationActivity extends XmppActivity
         });
     }
 
-    private void attachImageToConversation(Conversation conversation, Uri uri) {
+    private void attachImageToConversation(final Conversation conversation, final Uri uri) {
         prepareFileToast = Toast.makeText(getApplicationContext(),
                 getText(R.string.preparing_image), Toast.LENGTH_LONG);
         prepareFileToast.show();
-        if (true) {
+        if (useMessenger7API) {
             File file = FileUtils.getFileByUri(this, uri);
             Log.i(TAG, "file=" + file);
             if (file != null && file.exists()) {
@@ -935,10 +962,15 @@ public class ConversationActivity extends XmppActivity
                     }
 
                     @Override
-                    public void onFinish(boolean success, String... messages) {
+                    public void onFinish(boolean success, final String... urls) {
                         if (success) {
+                            if (urls.length > 0) {
+                                Log.d(TAG, "url=" + urls[0]);
+                                final Message message = new Message(getSelectedConversation(), urls[0], 0);
+                                xmppConnectionService.sendMessage(message);
+                            }
                         } else {
-                            Toast.makeText(getApplicationContext(), messages[0], Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), urls[0], Toast.LENGTH_LONG).show();
                         }
                     }
                 }, file);

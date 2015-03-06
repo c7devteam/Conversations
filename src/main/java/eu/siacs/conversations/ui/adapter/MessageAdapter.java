@@ -309,7 +309,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
         viewHolder.image.setVisibility(View.GONE);
         viewHolder.messageBody.setVisibility(View.GONE);
         viewHolder.download_button.setVisibility(View.VISIBLE);
-//        viewHolder.download_button.setText(activity.getString(R.string.open_x_file, UIHelper.getFileDescriptionString(activity, message)));
+        //viewHolder.download_button.setText(activity.getString(R.string.open_x_file, UIHelper.getFileDescriptionString(activity, message)));
         viewHolder.download_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -368,7 +368,7 @@ public class MessageAdapter extends ArrayAdapter<Message> {
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
-        Log.i(TAG,"notifyDataSetChanged");
+        Log.i(TAG, "notifyDataSetChanged");
     }
 
     @Override
@@ -550,6 +550,8 @@ public class MessageAdapter extends ArrayAdapter<Message> {
             }
         } else if (message.getEncryption() == Message.ENCRYPTION_DECRYPTION_FAILED) {
             displayDecryptionFailed(viewHolder);
+        } else if (message.bodyContainsDownloadable()) {
+            displayOpenableMessage(viewHolder, message);
         } else {
             displayTextMessage(viewHolder, message);
         }

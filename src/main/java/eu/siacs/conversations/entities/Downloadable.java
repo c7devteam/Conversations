@@ -2,27 +2,29 @@ package eu.siacs.conversations.entities;
 
 public interface Downloadable {
 
-	public final String[] VALID_IMAGE_EXTENSIONS = {"webp", "jpeg", "jpg", "png", "jpe"};
-	public final String[] VALID_CRYPTO_EXTENSIONS = {"pgp", "gpg", "otr"};
+    public final String[] VALID_IMAGE_EXTENSIONS = {"webp", "jpeg", "jpg", "png", "jpe"};
+    public final String[] VALID_AUDIO_EXTENSIONS = {"ogg", "aac", "wav", "mp3"};
+    public final String[] VALID_CRYPTO_EXTENSIONS = {"pgp", "gpg", "otr"};
 
-	public static final int STATUS_UNKNOWN = 0x200;
-	public static final int STATUS_CHECKING = 0x201;
-	public static final int STATUS_FAILED = 0x202;
-	public static final int STATUS_OFFER = 0x203;
-	public static final int STATUS_DOWNLOADING = 0x204;
-	public static final int STATUS_DELETED = 0x205;
-	public static final int STATUS_OFFER_CHECK_FILESIZE = 0x206;
-	public static final int STATUS_UPLOADING = 0x207;
 
-	public boolean start();
+    public static final int STATUS_UNKNOWN = 0x200;
+    public static final int STATUS_CHECKING = 0x201;
+    public static final int STATUS_FAILED = 0x202;
+    public static final int STATUS_OFFER = 0x203;
+    public static final int STATUS_DOWNLOADING = 0x204;
+    public static final int STATUS_DELETED = 0x205;
+    public static final int STATUS_OFFER_CHECK_FILESIZE = 0x206;
+    public static final int STATUS_UPLOADING = 0x207;
 
-	public int getStatus();
+    public boolean start();
 
-	public long getFileSize();
+    public int getStatus();
 
-	public int getProgress();
+    public long getFileSize();
 
-	public String getMimeType();
+    public int getProgress();
 
-	public void cancel();
+    public String getMimeType();
+
+    public void cancel();
 }
